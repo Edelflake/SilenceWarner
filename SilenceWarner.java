@@ -78,6 +78,11 @@ boolean stress = false;
   //background(amp1.analyze()*255);
   
 }
+ public void SaveSilenceList(File selection) {
+
+    println("User selected " + selection.getAbsolutePath());
+    saveTable(table, selection.getAbsolutePath() + "Silence Record.csv");
+}
  public void silenceList() {
 
   if (silenceTime >= 8000) {
@@ -140,19 +145,17 @@ boolean stress = false;
 }
  public void indicateurs() {
   
-  PImage lockedIcon = loadImage("lockedIcon.png");
-  PImage unlockedIcon = loadImage("unlockedIcon.png");
- 
   noStroke();
   fill(60);
   
-  //rectangle blanc antenne
-  rect(marge,marge,marge+134,marge*3+fontSize,marge);
-  //rectangle gate
+  //BOXS
+  //rectangle silence/ sound in
+  rect(marge,marge,marge+96,marge*3+fontSize,marge);
+  //rectangle threshold
   rect(width-marge*3-100,marge*3+fontSize,width-marge, marge,marge);
-  //rectangle VU metre
+  //rectangle VUmetre
   rect(marge,marge*4+fontSize,marge*3+20,height-marge,marge);
-  //rectangle décompte
+  //rectangle silence count
   if (silenceTime<4000){    
     fill(0xFF7AC676);
   }else if (4000<= silenceTime && silenceTime<6000){
@@ -166,62 +169,76 @@ boolean stress = false;
   }else if (10000 < silenceTime && (silenceTime/100)%2 == 1){
     fill(60);
   }
-  
   rect(marge*4+20,marge*4+fontSize,width-marge,height-marge,marge);
   
-  //textes
+  //ICONS
+  //GateLock icon
+  if (gateLocked){
+    PImage lockedIcon = loadImage("lockedIcon.png");
+    image (lockedIcon,width-marge*2-132,marge);
+  }else{
+    PImage unlockedIcon = loadImage("unlockedIcon.png");
+    image (unlockedIcon,width-marge*2-132,marge);
+  }
+  //Save Silence List Icon
+  PImage SaveSilenceListIcon = loadImage("SaveSilenceListIcon.png");
+  image (SaveSilenceListIcon,marge*2+96,marge);
+  
+  //TEXTS
   fill(255);
   textSize(fontSize);
   textAlign(LEFT);
-  //texte threshold
+  //text threshold
   text("Threshold", width-marge-100,marge*2+fontSize );
-  //texte blanc antenne
+  //text silence/ sound in
   if (detectSilence() == true){
-    text("blanc antenne",marge*2,marge*2+fontSize);
+    text("Silence",marge*2,marge*2+fontSize);
   }else{
-    text("son",marge*2,marge*2+fontSize);
+    text("Sound In",marge*2,marge*2+fontSize);
   }
-  //texte décompte
+  //text silence count
   textAlign(CENTER);
   textSize(256);
   fill(0);
   text(silenceTime/1000,((marge*4+20)+(width-marge))/2,((marge*4+fontSize)+(height-marge))/2+96);
+  //text warning 
   if (4000<= silenceTime){
     textSize(40);
-    text("BLANC ANTENNE", ((marge*4+20)+(width-marge))/2,((marge*4+fontSize)+(height-marge))/4);
+    text("BLANC ANTENNE!", ((marge*4+20)+(width-marge))/2,((marge*4+fontSize)+(height-marge))/4);
   }
-  
-  //icône GateLock
-  if (gateLocked){
-    image(lockedIcon,width-marge*2-132,marge);
-  }else{
-    image(unlockedIcon,width-marge*2-132,marge);
-  }
-  stroke(255);
-  strokeWeight(2);
-  line(marge,(height-marge*2) - (threshold)*(height-(marge*7+fontSize)), marge*3+20,(height-marge*2) - (threshold)*(height-(marge*7+fontSize)));
 }
  public void mouseClicked() {
-    if ((mouseX >= width-(marge*3+182)) && (mouseX <=width-(marge*2+150)) && (mouseY >= marge) && (mouseY <= marge+32)) {
+    
+  //click on threshold lock icon
+  if ((mouseX >= width-(marge*3+132)) && (mouseX <=width-(marge*2+100)) && (mouseY >= marge) && (mouseY <= marge+32)) {
     
     gateLocked = !gateLocked;
   }
+  
+  //click on export logs icon
+  if ((mouseX >= marge*2+96) && (mouseX <=marge*2+96+32) && (mouseY >= marge) && (mouseY <= marge+32)) {
+    
+    selectOutput("Select a file to write to:", "SaveSilenceList");
+  }
 }
  public void silenceCount(){
- if (detectSilence() == false) {
-   silenceTime = 0;
- }else{
-   silenceTime = millis()-silenceStart;
- }
+ 
+  if (detectSilence() == false) {
+    silenceTime = 0;
+  }else{
+    silenceTime = millis()-silenceStart;
+  }
 }
  public void vuMetre() {
- 
  
  fill(0xFF36B782);
  noStroke();
  rect(marge*2,height-marge*2,marge*2+9,(height-marge*2) - (2*amp1.analyze())*(height-(marge*7+fontSize)));
  rect(marge*2+11,height-marge*2,marge*2+20,(height-marge*2) - (2*amp2.analyze())*(height-(marge*7+fontSize)));
-
+ 
+ stroke(255);
+ strokeWeight(3);
+ line(marge,(height-marge*2) - (threshold)*(height-(marge*7+fontSize)), marge*3+20,(height-marge*2) - (threshold)*(height-(marge*7+fontSize)));
 }
 
 
